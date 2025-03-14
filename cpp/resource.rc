@@ -1,0 +1,9 @@
+#include <windows.h>
+
+#define IDI_ICON1 101
+#define IDI_ICON2 102
+#define IDI_ICON3 103
+
+IDI_ICON1 ICON "target.ico"    // 主图标
+IDI_ICON2 ICON "target16.ico"  // 16x16 图标
+IDI_ICON3 ICON "target32.ico"  // 32x32 图标 
