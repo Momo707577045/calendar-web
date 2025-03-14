@@ -15,6 +15,7 @@
       --weekend-color: #81c784;
       --today-color: #64b5f6;
       --selected-color: #ffb74d;
+      --workday-color: #ff9800;
       --border-color: #e0e0e0;
       --shadow-color: rgba(0, 0, 0, 0.1);
     }
@@ -238,6 +239,26 @@
       color: var(--holiday-color);
     }
 
+    .day.workday {
+      position: relative;
+    }
+
+    .day.workday::after {
+      content: '班';
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      font-size: 0.6rem;
+      background-color: var(--workday-color);
+      color: white;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
     .day.selected {
       border-color: var(--selected-color);
       background-color: rgba(255, 183, 77, 0.1);
@@ -249,6 +270,13 @@
       font-size: 0.75rem;
       margin-top: 4px;
       opacity: 0.8;
+    }
+
+    .holiday-name {
+      font-size: 0.75rem;
+      margin-top: 4px;
+      color: var(--holiday-color);
+      font-weight: 500;
     }
 
     .decoration {
@@ -323,98 +351,22 @@
     <div class="calendar-grid" id="calendar-grid"></div>
   </div>
 
+  <!-- 引入 chinese-days 库 -->
+  <script src="./chinese-days.js"></script>
+  <script src="./calendar-converter.js"></script>
   <script>
-    // 农历数据
-    const lunarInfo = [
-      0x04bd8, 0x04ae0, 0x0a570, 0x054d5, 0x0d260, 0x0d950, 0x16554, 0x056a0, 0x09ad0, 0x055d2,
-      0x04ae0, 0x0a5b6, 0x0a4d0, 0x0d250, 0x1d255, 0x0b540, 0x0d6a0, 0x0ada2, 0x095b0, 0x14977,
-      0x04970, 0x0a4b0, 0x0b4b5, 0x06a50, 0x06d40, 0x1ab54, 0x02b60, 0x09570, 0x052f2, 0x04970,
-      0x06566, 0x0d4a0, 0x0ea50, 0x06e95, 0x05ad0, 0x02b60, 0x186e3, 0x092e0, 0x1c8d7, 0x0c950,
-      0x0d4a0, 0x1d8a6, 0x0b550, 0x056a0, 0x1a5b4, 0x025d0, 0x092d0, 0x0d2b2, 0x0a950, 0x0b557,
-      0x06ca0, 0x0b550, 0x15355, 0x04da0, 0x0a5d0, 0x14573, 0x052d0, 0x0a9a8, 0x0e950, 0x06aa0,
-      0x0aea6, 0x0ab50, 0x04b60, 0x0aae4, 0x0a570, 0x05260, 0x0f263, 0x0d950, 0x05b57, 0x056a0,
-      0x096d0, 0x04dd5, 0x04ad0, 0x0a4d0, 0x0d4d4, 0x0d250, 0x0d558, 0x0b540, 0x0b5a0, 0x195a6,
-      0x095b0, 0x049b0, 0x0a974, 0x0a4b0, 0x0b27a, 0x06a50, 0x06d40, 0x0af46, 0x0ab60, 0x09570,
-      0x04af5, 0x04970, 0x064b0, 0x074a3, 0x0ea50, 0x06b58, 0x055c0, 0x0ab60, 0x096d5, 0x092e0,
-      0x0c960, 0x0d954, 0x0d4a0, 0x0da50, 0x07552, 0x056a0, 0x0abb7, 0x025d0, 0x092d0, 0x0cab5,
-      0x0a950, 0x0b4a0, 0x0baa4, 0x0ad50, 0x055d9, 0x04ba0, 0x0a5b0, 0x15176, 0x052b0, 0x0a930,
-      0x07954, 0x06aa0, 0x0ad50, 0x05b52, 0x04b60, 0x0a6e6, 0x0a4e0, 0x0d260, 0x0ea65, 0x0d530,
-      0x05aa0, 0x076a3, 0x096d0, 0x04bd7, 0x04ad0, 0x0a4d0, 0x1d0b6, 0x0d250, 0x0d520, 0x0dd45,
-      0x0b5a0, 0x056d0, 0x055b2, 0x049b0, 0x0a577, 0x0a4b0, 0x0aa50, 0x1b255, 0x06d20, 0x0ada0
-    ];
-
-    // 农历月份
-    const lunarMonths = ['正', '二', '三', '四', '五', '六', '七', '八', '九', '十', '冬', '腊'];
-
-    // 农历日期
-    const lunarDays = [
-      '初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十',
-      '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十',
-      '廿一', '廿二', '廿三', '廿四', '廿五', '廿六', '廿七', '廿八', '廿九', '三十'
-    ];
-
-    // 中国传统节日（农历）
-    const traditionalHolidays = {
-      '1-1': '春节',
-      '1-15': '元宵节',
-      '5-5': '端午节',
-      '7-7': '七夕',
-      '8-15': '中秋节',
-      '9-9': '重阳节',
-      '12-30': '除夕'
-    };
-
-    // 法定节假日（公历）
-    const legalHolidays = {
-      '1-1': '元旦',
-      '5-1': '劳动节',
-      '10-1': '国庆节'
-    };
-
-    // 获取农历信息
-    function getLunarDate(date) {
-      const year = date.getFullYear();
-      const month = date.getMonth() + 1;
-      const day = date.getDate();
-
-      // 简化版农历转换，实际项目中可能需要更复杂的算法
-      // 这里只是简单模拟
-      const lunarDay = ((day + month) % 30);
-      const lunarMonth = ((month + year) % 12);
-
-      return {
-        month: lunarMonths[lunarMonth],
-        day: lunarDays[lunarDay]
-      };
-    }
-
-    // 判断是否为节假日
-    function isHoliday(date) {
-      const month = date.getMonth() + 1;
-      const day = date.getDate();
-      const key = `${month}-${day}`;
-
-      // 检查是否为法定节假日
-      if (legalHolidays[key]) {
-        return true;
-      }
-
-      // 简化版农历节日判断
-      const lunar = getLunarDate(date);
-      const lunarKey = `${lunar.month}-${lunar.day}`;
-      if (traditionalHolidays[lunarKey]) {
-        return true;
-      }
-
-      // 周末也算作节假日
-      const dayOfWeek = date.getDay();
-      return dayOfWeek === 0 || dayOfWeek === 6;
-    }
-
     // 判断是否为周末
     function isWeekend(date) {
       const dayOfWeek = date.getDay();
       return dayOfWeek === 0 || dayOfWeek === 6;
+    }
+
+    // 格式化日期为 YYYY-MM-DD
+    function formatDate(date) {
+      const year = date.getFullYear();
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, '0');
+      return `${year}-${month}-${day}`;
     }
 
     // 生成日历
@@ -469,9 +421,11 @@
         // 添加日期
         for (let day = 1; day <= daysInMonth; day++) {
           const date = new Date(year, month, day);
+          const dateStr = formatDate(date);
           const dayElement = document.createElement('div');
+          const dateDetail = calendar.solar2lunar(year, month + 1, day)
           dayElement.className = 'day';
-          dayElement.dataset.date = `${year}-${month + 1}-${day}`;
+          dayElement.dataset.date = dateStr;
 
           // 判断是否为今天
           if (date.getDate() === today.getDate() &&
@@ -481,27 +435,32 @@
             currentMonthElement = monthElement;
           }
 
-          // 判断是否为周末
-          if (isWeekend(date)) {
+          // 判断是否为周末（不是调休工作日的周末）
+          if (isWeekend(date) && !chineseDays.isWorkday(dateStr)) {
             dayElement.classList.add('weekend');
           }
 
-          // 判断是否为节假日
-          if (isHoliday(date) && !isWeekend(date)) {
+          // 判断是否为法定节假日
+          if (chineseDays.isHoliday(dateStr)) {
             dayElement.classList.add('holiday');
           }
 
-          // 公历日期
-          const solarDay = document.createElement('div');
-          solarDay.textContent = day;
-          dayElement.appendChild(solarDay);
+          // 判断是否为调休工作日
+          if (isWeekend(date) && chineseDays.isWorkday(dateStr)) {
+            dayElement.classList.add('workday');
+          }
 
-          // 农历日期
-          const lunar = getLunarDate(date);
-          const lunarDay = document.createElement('div');
-          lunarDay.className = 'lunar';
-          lunarDay.textContent = lunar.day === '初一' ? `${lunar.month}月` : lunar.day;
-          dayElement.appendChild(lunarDay);
+          // 公历日期
+          const mainDay = document.createElement('div');
+          const subDay = document.createElement('div');
+          mainDay.textContent = day;
+          subDay.textContent = dateDetail.festival || dateDetail.lunarFestival || dateDetail.Term || dateDetail.IDayCn;
+          dayElement.appendChild(mainDay);
+          dayElement.appendChild(subDay);
+          subDay.className = 'lunar';
+          if (subDay.textContent === '初一') {
+            subDay.textContent = dateDetail.IMonthCn
+          }
 
           // 添加点击事件
           dayElement.addEventListener('click', function () {
@@ -513,9 +472,8 @@
             // 选中当前日期
             this.classList.add('selected');
             selectedDate = this.dataset.date;
-
-            // 可以在这里添加其他选中日期后的操作
-            console.log('选中日期:', selectedDate);
+            const date = new Date(selectedDate)
+            console.log('选中日期:', selectedDate, calendar.solar2lunar(date.getFullYear(), date.getMonth() + 1, date.getDate()));
           });
 
           days.appendChild(dayElement);
