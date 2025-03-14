@@ -136,10 +136,10 @@ var calendar = (function () {
       title: '腊八节'
     },
     '12-23': {
-      title: '北方小年'
+      title: '北小年'
     },
     '12-24': {
-      title: '南方小年'
+      title: '南小年'
     }
   };
 
