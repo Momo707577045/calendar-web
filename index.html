@@ -15,7 +15,6 @@
       --weekend-color: #81c784;
       --today-color: #64b5f6;
       --selected-color: #ffb74d;
-      --workday-color: #ff9800;
       --border-color: #e0e0e0;
       --shadow-color: rgba(0, 0, 0, 0.1);
     }
@@ -196,7 +195,7 @@
       display: grid;
       grid-template-columns: repeat(7, 1fr);
       grid-gap: 4px;
-      padding: 15px;
+      padding: 12px;
     }
 
     .day {
@@ -205,12 +204,12 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      border-radius: 12px;
+      border-radius: 8px;
       font-size: 1.2rem;
+      font-weight: bold;
       position: relative;
       cursor: pointer;
       transition: all 0.3s ease;
-      padding: 5px;
       border: 2px solid transparent;
     }
 
@@ -233,30 +232,48 @@
 
     .day.weekend {
       color: var(--weekend-color);
+      background-color: #FFF7F7;
     }
 
     .day.holiday {
       color: var(--holiday-color);
+      background-color: #FFF7F7;
     }
 
     .day.workday {
       position: relative;
+      background-color: rgba(0, 0, 0, 0.05);
     }
 
-    .day.workday::after {
-      content: '班';
+    .day.weekend::after,
+    .day.workday::after,
+    .day.holiday::after {
       position: absolute;
       top: 2px;
       right: 2px;
       font-size: 0.6rem;
-      background-color: var(--workday-color);
       color: white;
       width: 14px;
       height: 14px;
-      border-radius: 50%;
+      border-radius: 2px;
       display: flex;
       justify-content: center;
       align-items: center;
+    }
+
+    .day.holiday::after {
+      content: '休';
+      background-color: #F7493B;
+    }
+
+    .day.weekend::after {
+      content: '周';
+      background-color: #F8ABA4;
+    }
+
+    .day.workday::after {
+      content: '班';
+      background-color: #9EA0A1;
     }
 
     .day.selected {
@@ -270,13 +287,18 @@
       font-size: 0.75rem;
       margin-top: 4px;
       opacity: 0.8;
+      color: #929191;
+      font-weight: normal;
     }
 
-    .holiday-name {
-      font-size: 0.75rem;
-      margin-top: 4px;
+    .festival {
       color: var(--holiday-color);
-      font-weight: 500;
+      font-weight: bold;
+    }
+
+    .term {
+      color: #81c784;
+      font-weight: bold;
     }
 
     .decoration {
@@ -454,13 +476,26 @@
           const mainDay = document.createElement('div');
           const subDay = document.createElement('div');
           mainDay.textContent = day;
-          subDay.textContent = dateDetail.festival || dateDetail.lunarFestival || dateDetail.Term || dateDetail.IDayCn;
           dayElement.appendChild(mainDay);
           dayElement.appendChild(subDay);
           subDay.className = 'lunar';
-          if (subDay.textContent === '初一') {
-            subDay.textContent = dateDetail.IMonthCn
+          if (dateDetail.festival) {
+            subDay.textContent = dateDetail.festival
+            subDay.classList.add('festival');
+          } else if (dateDetail.lunarFestival) {
+            subDay.textContent = dateDetail.lunarFestival
+            subDay.classList.add('festival');
+          } else if (dateDetail.Term) {
+            subDay.textContent = dateDetail.Term
+            subDay.classList.add('term');
+          } else if (dateDetail.IDayCn) {
+            if (subDay.textContent === '初一') {
+              subDay.textContent = dateDetail.IMonthCn
+            } else {
+              subDay.textContent = dateDetail.IDayCn
+            }
           }
+
 
           // 添加点击事件
           dayElement.addEventListener('click', function () {
