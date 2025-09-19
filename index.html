@@ -71,6 +71,7 @@
       margin: 0 auto;
       position: relative;
       overflow: hidden;
+      gap: 10px;
     }
 
     .year-selector::before {
@@ -111,6 +112,41 @@
       font-weight: 300;
       color: white;
       text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .quick-nav-buttons {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .quick-nav-buttons button {
+      background-color: rgba(255, 255, 255, 0.15) !important;
+      border: none;
+      font-size: 0.9rem !important;
+      cursor: pointer;
+      color: rgba(255, 255, 255, 0.9);
+      width: 35px !important;
+      height: 35px !important;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.3s ease;
+      margin: 0 !important;
+      font-weight: 500;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .quick-nav-buttons button:hover {
+      background-color: rgba(255, 255, 255, 0.3) !important;
+      transform: scale(1.05);
+      color: white;
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .quick-nav-buttons button:active {
+      transform: scale(0.95);
     }
 
     .calendar-grid {
@@ -214,8 +250,8 @@
     }
 
     .day.today {
-      color: #4ca350;
-      background-color: #def3de;
+      color: #4ca350 !important;
+      background-color: #def3de !important;
     }
 
     .day.weekend {
@@ -326,27 +362,6 @@
     .term {
       color: #81c784;
       font-weight: bolder;
-    }
-
-    .decoration {
-      position: absolute;
-      width: 150px;
-      height: 150px;
-      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 150 150"><circle cx="75" cy="75" r="70" stroke="%238bc6ec" stroke-width="2" fill="none" stroke-opacity="0.2"/><circle cx="75" cy="75" r="50" stroke="%239599e2" stroke-width="2" fill="none" stroke-opacity="0.2"/><circle cx="75" cy="75" r="30" stroke="%238bc6ec" stroke-width="2" fill="none" stroke-opacity="0.2"/></svg>');
-      background-repeat: no-repeat;
-      background-size: contain;
-      z-index: -1;
-      opacity: 0.6;
-    }
-
-    .decoration-1 {
-      top: -50px;
-      left: -50px;
-    }
-
-    .decoration-2 {
-      bottom: -50px;
-      right: -50px;
     }
 
     /* 新增样式 */
@@ -487,19 +502,80 @@
     .modal-button:hover {
       transform: translateY(-2px);
     }
+
+    /* 返回今天按钮样式 */
+    .back-to-today {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      border: none;
+      border-radius: 50px;
+      padding: 12px 20px;
+      color: white;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+    }
+
+    .back-to-today:hover {
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .back-to-today:active {
+      transform: translateY(0) scale(0.95);
+    }
+
+    .today-icon {
+      font-size: 1.1rem;
+      filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.3));
+    }
+
+    .today-text {
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .back-to-today {
+        right: 15px;
+        bottom: 15px;
+        padding: 10px 16px;
+        font-size: 0.8rem;
+      }
+      
+      .today-icon {
+        font-size: 1rem;
+      }
+    }
   </style>
 </head>
 
 <body>
   <div class="container">
-    <div class="decoration decoration-1"></div>
-    <div class="decoration decoration-2"></div>
-
     <header>
       <div class="year-selector">
+        <div class="quick-nav-buttons quick-nav-prev">
+          <button id="prev-10-year" title="往前10年">-10</button>
+          <button id="prev-5-year" title="往前5年">-5</button>
+          <button id="prev-3-year" title="往前3年">-3</button>
+        </div>
         <button id="prev-year">◀</button>
         <span id="current-year"></span>
         <button id="next-year">▶</button>
+        <div class="quick-nav-buttons quick-nav-next">
+          <button id="next-3-year" title="往后3年">+3</button>
+          <button id="next-5-year" title="往后5年">+5</button>
+          <button id="next-10-year" title="往后10年">+10</button>
+        </div>
       </div>
     </header>
 
@@ -536,6 +612,12 @@
     </div>
     <button class="modal-button" id="set-anchor-date">设置为锚点日期</button>
   </div>
+
+  <!-- 返回今天按钮 -->
+  <button class="back-to-today" id="back-to-today" title="返回今天">
+    <span class="today-icon">📅</span>
+    <span class="today-text">今天</span>
+  </button>
 
 
 </body>
@@ -769,23 +851,38 @@
     addAnimationEffects();
 
     // 设置初始锚点日期为今天
-    setAnchorDate(today);
+    const anchorDate = localStorage.getItem('anchorDate');
+    if (anchorDate) {
+      setAnchorDate(new Date(anchorDate));
+    } else {
+      setAnchorDate(today);
+    }
+
+    // 年份切换函数
+    function changeYear(offset) {
+      const yearElement = document.getElementById('current-year');
+      const year = parseInt(yearElement.textContent) + offset;
+      yearElement.textContent = year;
+      generateCalendar(year);
+      addAnimationEffects();
+    }
 
     // 年份切换
-    document.getElementById('prev-year').addEventListener('click', () => {
-      const yearElement = document.getElementById('current-year');
-      const year = parseInt(yearElement.textContent) - 1;
-      yearElement.textContent = year;
-      generateCalendar(year);
-      addAnimationEffects();
-    });
+    document.getElementById('prev-year').addEventListener('click', () => changeYear(-1));
+    document.getElementById('next-year').addEventListener('click', () => changeYear(1));
 
-    document.getElementById('next-year').addEventListener('click', () => {
-      const yearElement = document.getElementById('current-year');
-      const year = parseInt(yearElement.textContent) + 1;
-      yearElement.textContent = year;
-      generateCalendar(year);
-      addAnimationEffects();
+    // 快速跳转按钮
+    document.getElementById('prev-3-year').addEventListener('click', () => changeYear(-3));
+    document.getElementById('prev-5-year').addEventListener('click', () => changeYear(-5));
+    document.getElementById('prev-10-year').addEventListener('click', () => changeYear(-10));
+    document.getElementById('next-3-year').addEventListener('click', () => changeYear(3));
+    document.getElementById('next-5-year').addEventListener('click', () => changeYear(5));
+    document.getElementById('next-10-year').addEventListener('click', () => changeYear(10));
+
+    // 返回今天按钮
+    document.getElementById('back-to-today').addEventListener('click', () => {
+      // 刷新页面，回到今天
+      window.location.reload();
     });
 
     // 点击文档其他地方关闭弹窗
@@ -826,6 +923,8 @@
   // 设置锚点日期
   function setAnchorDate(date) {
     const dateStr = formatDate(date);
+    localStorage.setItem('anchorDate', dateStr);
+
     const anchorDateContent = document.getElementById('anchor-date-content');
     anchorDateContent.textContent = `锚点: ${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
     window.anchorDate = date;
