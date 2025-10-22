@@ -979,8 +979,9 @@
     let holidays = 0;
     let totalDays = 0;
     let currentDate = new Date(start);
+    currentDate.setDate(currentDate.getDate() + 1);
 
-    while (currentDate < end) {
+    while (currentDate <= end) {
       totalDays++;
       const dateStr = formatDate(currentDate);
       
