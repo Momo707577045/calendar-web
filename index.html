@@ -556,6 +556,32 @@
         font-size: 1rem;
       }
     }
+
+    .m-p-help {
+      position: fixed;
+      right: 50px;
+      top: 50px;
+      width: 30px;
+      height: 30px;
+      color: #666666;
+      z-index: 2;
+      line-height: 30px;
+      font-weight: bolder;
+      border-radius: 50%;
+      border: 1px solid rgba(27, 31, 35, .2);
+      cursor: pointer;
+      background-color: #eff3f6;
+      background-image: linear-gradient(-180deg, #fafbfc, #eff3f6 90%);
+    }
+
+    .m-p-github:hover,
+    .m-p-other:hover,
+    .m-p-tamper:hover,
+    .m-p-help:hover,
+    .m-p-language:hover,
+    .m-p-mse:hover {
+      opacity: 0.9;
+    }
   </style>
 </head>
 
@@ -577,6 +603,7 @@
           <button id="next-10-year" title="往后10年">+10</button>
         </div>
       </div>
+      <a class="m-p-help" target="_blank" href="https://github.com/Momo707577045/calendar-web">?</a>
     </header>
 
     <div class="calendar-grid" id="calendar-grid"></div>
@@ -956,13 +983,24 @@
     while (currentDate < end) {
       totalDays++;
       const dateStr = formatDate(currentDate);
-      if (dateConf.isHoliday(dateStr) || isWeekend(currentDate)) {
-        holidays++;
-      } else if (dateConf.isWorkday(dateStr)) {
-        workdays++;
-      } else if (!isWeekend(currentDate)) {
+      
+      // 优先判断是否为调休工作日（周末但需要上班）
+      if (dateConf.isWorkday(dateStr)) {
         workdays++;
       }
+      // 其次判断是否为法定节假日
+      else if (dateConf.isHoliday(dateStr)) {
+        holidays++;
+      }
+      // 然后判断是否为周末（非调休工作日的周末）
+      else if (isWeekend(currentDate)) {
+        holidays++;
+      }
+      // 最后是正常工作日（周一到周五，非节假日）
+      else {
+        workdays++;
+      }
+      
       currentDate.setDate(currentDate.getDate() + 1);
     }
     if (startDate.getTime() > endDate.getTime()) {
