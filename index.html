@@ -149,6 +149,118 @@
       transform: scale(0.95);
     }
 
+    /* 年份开关样式 */
+    .year-toggles {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      margin: 25px;
+    }
+
+    .year-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 8px 16px;
+      border-radius: 25px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      user-select: none;
+    }
+
+    .year-toggle:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .year-toggle-label {
+      font-size: 0.9rem;
+      color: var(--text-color);
+      font-weight: 500;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      background: #ccc;
+      border-radius: 12px;
+      transition: background 0.3s ease;
+    }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .year-toggle.active .toggle-switch {
+      background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    }
+
+    .year-toggle.active .toggle-switch::after {
+      transform: translateX(20px);
+    }
+
+    /* 底部开关样式 */
+    .year-toggles.bottom-toggle {
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+
+    /* 年份分隔区块样式 */
+    .year-section {
+      margin-bottom: 30px;
+    }
+
+    .year-section-header {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: white;
+      padding: 15px 30px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .year-section-header.prev-year {
+      background: linear-gradient(135deg, #a8d8ea, #aa96da);
+    }
+
+    .year-section-header.next-year {
+      background: linear-gradient(135deg, #fcbad3, #aa96da);
+    }
+
+    .year-section-title {
+      font-size: 1.5rem;
+      font-weight: 500;
+      letter-spacing: 2px;
+    }
+
+    .year-section-badge {
+      font-size: 0.8rem;
+      background: rgba(255, 255, 255, 0.3);
+      padding: 4px 12px;
+      border-radius: 15px;
+    }
+
+    .year-section .calendar-grid {
+      margin-bottom: 0;
+    }
+
     .calendar-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -161,13 +273,7 @@
       border-radius: 15px;
       overflow: hidden;
       box-shadow: 0 5px 20px var(--shadow-color);
-      transition: all 0.3s ease;
       position: relative;
-    }
-
-    .month:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     }
 
     .month::before {
@@ -235,14 +341,11 @@
       font-weight: bold;
       position: relative;
       cursor: pointer;
-      transition: all 0.3s ease;
       border: 2px solid transparent;
     }
 
     .day:hover {
       background-color: rgba(137, 198, 236, 0.2);
-      transform: translateY(-2px);
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
     }
 
     .day.empty {
@@ -305,22 +408,7 @@
       color: white;
       transform: scale(1.1);
       z-index: 1;
-      box-shadow: 0 0 15px rgba(rgb(139, 198, 236), 0.5);
-      animation: pulse 1.5s infinite;
-    }
-
-    @keyframes pulse {
-      0% {
-        box-shadow: 0 0 15px rgba(139, 198, 236, 0.5);
-      }
-
-      50% {
-        box-shadow: 0 0 20px rgba(139, 198, 236, 0.8);
-      }
-
-      100% {
-        box-shadow: 0 0 15px rgba(139, 198, 236, 0.5);
-      }
+      box-shadow: 0 0 15px rgba(139, 198, 236, 0.5);
     }
 
     .day.selected .lunar {
@@ -421,20 +509,7 @@
       box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
       padding: 12px;
       width: 220px;
-      animation: modalPopIn 0.3s ease;
       cursor: move;
-    }
-
-    @keyframes modalPopIn {
-      from {
-        transform: scale(0.8);
-        opacity: 0;
-      }
-
-      to {
-        transform: scale(1);
-        opacity: 1;
-      }
     }
 
     .modal-close {
@@ -606,7 +681,7 @@
       <a class="m-p-help" target="_blank" href="https://github.com/Momo707577045/calendar-web">?</a>
     </header>
 
-    <div class="calendar-grid" id="calendar-grid"></div>
+    <div id="calendar-container"></div>
   </div>
 
   <!-- 锚点日期显示 -->
@@ -730,6 +805,10 @@
 </script>
 <script>
 
+  // 年份开关状态
+  let showPrevYear = false;
+  let showNextYear = false;
+
   // 判断是否为周末
   function isWeekend(date) {
     const dayOfWeek = date.getDay();
@@ -744,14 +823,10 @@
     return `${year}-${month}-${day}`;
   }
 
-  // 生成日历
-  function generateCalendar(year) {
-    const calendarGrid = document.getElementById('calendar-grid');
-    calendarGrid.innerHTML = '';
-
+  // 生成单年日历网格
+  function generateYearGrid(year, container) {
     const today = new Date();
     let currentMonthElement = null;
-    let selectedDate = null;
 
     for (let month = 0; month < 12; month++) {
       const monthElement = document.createElement('div');
@@ -858,15 +933,110 @@
       }
 
       monthElement.appendChild(days);
-      calendarGrid.appendChild(monthElement);
+      container.appendChild(monthElement);
     }
 
-    // 自动滚动到当前月份
-    if (currentMonthElement && year === today.getFullYear()) {
-      setTimeout(() => {
-        currentMonthElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 100);
+    return currentMonthElement;
+  }
+
+  // 创建年份区块
+  function createYearSection(year, type) {
+    const section = document.createElement('div');
+    section.className = 'year-section';
+    section.id = `year-section-${year}`;
+
+    // 年份标题头部
+    const header = document.createElement('div');
+    header.className = `year-section-header ${type}`;
+    
+    const title = document.createElement('span');
+    title.className = 'year-section-title';
+    title.textContent = `${year} 年`;
+    
+    const badge = document.createElement('span');
+    badge.className = 'year-section-badge';
+    if (type === 'prev-year') {
+      badge.textContent = '上一年';
+    } else if (type === 'next-year') {
+      badge.textContent = '下一年';
+    } else {
+      badge.textContent = '当前年';
     }
+    
+    header.appendChild(title);
+    header.appendChild(badge);
+    section.appendChild(header);
+
+    // 日历网格容器
+    const grid = document.createElement('div');
+    grid.className = 'calendar-grid';
+    section.appendChild(grid);
+
+    return { section, grid };
+  }
+
+  // 创建年份切换开关元素
+  function createYearToggle(year, type, isActive) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'year-toggles' + (type === 'next' ? ' bottom-toggle' : '');
+    
+    const toggle = document.createElement('div');
+    toggle.className = 'year-toggle' + (isActive ? ' active' : '');
+    toggle.id = type === 'prev' ? 'toggle-prev-year' : 'toggle-next-year';
+    toggle.title = type === 'prev' ? '显示/隐藏前一年日历' : '显示/隐藏后一年日历';
+    
+    const label = document.createElement('span');
+    label.className = 'year-toggle-label';
+    label.id = type === 'prev' ? 'prev-year-label' : 'next-year-label';
+    label.textContent = type === 'prev' ? `显示 ${year} 年` : `显示 ${year} 年`;
+    
+    const switchEl = document.createElement('div');
+    switchEl.className = 'toggle-switch';
+    
+    toggle.appendChild(label);
+    toggle.appendChild(switchEl);
+    wrapper.appendChild(toggle);
+    
+    return wrapper;
+  }
+
+  // 生成日历（支持多年）
+  function generateCalendar(year) {
+    const calendarContainer = document.getElementById('calendar-container');
+    calendarContainer.innerHTML = '';
+
+    const today = new Date();
+    let currentMonthElement = null;
+
+    // 生成前一年日历
+    if (showPrevYear) {
+      const { section, grid } = createYearSection(year - 1, 'prev-year');
+      generateYearGrid(year - 1, grid);
+      calendarContainer.appendChild(section);
+    }
+
+    // 创建"显示前一年"开关（紧贴当前年上方）
+    const prevYearToggle = createYearToggle(year - 1, 'prev', showPrevYear);
+    calendarContainer.appendChild(prevYearToggle);
+
+    // 生成当前年日历
+    const { section: currentSection, grid: currentGrid } = createYearSection(year, 'current-year');
+    currentMonthElement = generateYearGrid(year, currentGrid);
+    calendarContainer.appendChild(currentSection);
+
+    // 创建"显示后一年"开关（紧贴当前年下方）
+    const nextYearToggle = createYearToggle(year + 1, 'next', showNextYear);
+    calendarContainer.appendChild(nextYearToggle);
+
+    // 生成后一年日历
+    if (showNextYear) {
+      const { section, grid } = createYearSection(year + 1, 'next-year');
+      generateYearGrid(year + 1, grid);
+      calendarContainer.appendChild(section);
+    }
+
+    // 绑定开关事件
+    bindToggleEvents();
 
     // 标记锚点日期
     if (window.anchorDate) {
@@ -878,29 +1048,70 @@
     }
   }
 
-  // 添加动画效果
-  function addAnimationEffects() {
-    const months = document.querySelectorAll('.month');
-    months.forEach((month, index) => {
-      month.style.opacity = '0';
-      month.style.transform = 'translateY(20px)';
-      month.style.transition = 'opacity 0.5s ease,transform 0.5s ease';
-
-      setTimeout(() => {
-        month.style.opacity = '1';
-        month.style.transform = 'translateY(0)';
-      }, 100 + index * 50);
-    });
+  // 绑定开关事件（由于开关是动态创建的，需要重新绑定）
+  function bindToggleEvents() {
+    const togglePrevYear = document.getElementById('toggle-prev-year');
+    const toggleNextYear = document.getElementById('toggle-next-year');
+    
+    if (togglePrevYear) {
+      togglePrevYear.onclick = () => {
+        showPrevYear = !showPrevYear;
+        localStorage.setItem('showPrevYear', showPrevYear);
+        if (window.refreshCalendarFn) {
+          window.refreshCalendarFn();
+        }
+      };
+    }
+    
+    if (toggleNextYear) {
+      toggleNextYear.onclick = () => {
+        showNextYear = !showNextYear;
+        localStorage.setItem('showNextYear', showNextYear);
+        if (window.refreshCalendarFn) {
+          window.refreshCalendarFn();
+        }
+      };
+    }
   }
+
+  // 绑定开关事件（由于开关是动态创建的，需要重新绑定）
+  function bindToggleEvents() {
+    const togglePrevYear = document.getElementById('toggle-prev-year');
+    const toggleNextYear = document.getElementById('toggle-next-year');
+    
+    if (togglePrevYear) {
+      togglePrevYear.onclick = () => {
+        showPrevYear = !showPrevYear;
+        localStorage.setItem('showPrevYear', showPrevYear);
+        if (window.refreshCalendarFn) {
+          window.refreshCalendarFn();
+        }
+      };
+    }
+    
+    if (toggleNextYear) {
+      toggleNextYear.onclick = () => {
+        showNextYear = !showNextYear;
+        localStorage.setItem('showNextYear', showNextYear);
+        if (window.refreshCalendarFn) {
+          window.refreshCalendarFn();
+        }
+      };
+    }
+  }
+
 
   // 初始化
   function init() {
     const today = new Date();
     const currentYear = today.getFullYear();
 
+    // 从 localStorage 恢复开关状态
+    showPrevYear = localStorage.getItem('showPrevYear') === 'true';
+    showNextYear = localStorage.getItem('showNextYear') === 'true';
+
     document.getElementById('current-year').textContent = currentYear;
     generateCalendar(currentYear);
-    addAnimationEffects();
 
     // 设置初始锚点日期为今天
     const anchorDate = localStorage.getItem('anchorDate');
@@ -916,8 +1127,114 @@
       const year = parseInt(yearElement.textContent) + offset;
       yearElement.textContent = year;
       generateCalendar(year);
-      addAnimationEffects();
     }
+
+    // 刷新日历函数（保持滚动位置）
+    function refreshCalendar(keepScrollPosition = true) {
+      const yearElement = document.getElementById('current-year');
+      const year = parseInt(yearElement.textContent);
+      
+      // 记录当前滚动位置和视口中心元素
+      let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      let referenceElement = null;
+      let referenceOffset = 0;
+      
+      if (keepScrollPosition) {
+        // 找到当前视口中心附近的月份元素作为参考
+        const viewportCenter = scrollTop + window.innerHeight / 2;
+        const allMonths = document.querySelectorAll('.month');
+        
+        for (const month of allMonths) {
+          const rect = month.getBoundingClientRect();
+          const monthTop = rect.top + scrollTop;
+          const monthBottom = monthTop + rect.height;
+          
+          if (monthTop <= viewportCenter && monthBottom >= viewportCenter) {
+            // 记录这个月份的年月信息
+            const headerText = month.querySelector('.month-header').textContent;
+            referenceElement = headerText;
+            // 记录元素顶部相对于视口顶部的偏移
+            referenceOffset = rect.top;
+            break;
+          }
+        }
+      }
+      
+      generateCalendar(year);
+      
+      // 恢复滚动位置
+      if (keepScrollPosition && referenceElement) {
+        // 查找相同月份的新元素
+        const allMonths = document.querySelectorAll('.month');
+        for (const month of allMonths) {
+          const headerText = month.querySelector('.month-header').textContent;
+          if (headerText === referenceElement) {
+            // 计算新位置并滚动
+            const newRect = month.getBoundingClientRect();
+            const newScrollTop = window.pageYOffset + newRect.top - referenceOffset;
+            window.scrollTo(0, newScrollTop);
+            break;
+          }
+        }
+      }
+    }
+
+    // 将 refreshCalendar 暴露给全局，供动态创建的开关使用
+    window.refreshCalendarFn = refreshCalendar;
+
+    // 刷新日历函数（保持滚动位置）
+    function refreshCalendar(keepScrollPosition = true) {
+      const yearElement = document.getElementById('current-year');
+      const year = parseInt(yearElement.textContent);
+      
+      // 记录当前滚动位置和视口中心元素
+      let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      let referenceElement = null;
+      let referenceOffset = 0;
+      
+      if (keepScrollPosition) {
+        // 找到当前视口中心附近的月份元素作为参考
+        const viewportCenter = scrollTop + window.innerHeight / 2;
+        const allMonths = document.querySelectorAll('.month');
+        
+        for (const month of allMonths) {
+          const rect = month.getBoundingClientRect();
+          const monthTop = rect.top + scrollTop;
+          const monthBottom = monthTop + rect.height;
+          
+          if (monthTop <= viewportCenter && monthBottom >= viewportCenter) {
+            // 记录这个月份的年月信息
+            const headerText = month.querySelector('.month-header').textContent;
+            referenceElement = headerText;
+            // 记录元素顶部相对于视口顶部的偏移
+            referenceOffset = rect.top;
+            break;
+          }
+        }
+      }
+      
+      generateCalendar(year);
+      addAnimationEffects();
+      
+      // 恢复滚动位置
+      if (keepScrollPosition && referenceElement) {
+        // 查找相同月份的新元素
+        const allMonths = document.querySelectorAll('.month');
+        for (const month of allMonths) {
+          const headerText = month.querySelector('.month-header').textContent;
+          if (headerText === referenceElement) {
+            // 计算新位置并滚动
+            const newRect = month.getBoundingClientRect();
+            const newScrollTop = window.pageYOffset + newRect.top - referenceOffset;
+            window.scrollTo(0, newScrollTop);
+            break;
+          }
+        }
+      }
+    }
+
+    // 将 refreshCalendar 暴露给全局，供动态创建的开关使用
+    window.refreshCalendarFn = refreshCalendar;
 
     // 年份切换
     document.getElementById('prev-year').addEventListener('click', () => changeYear(-1));
